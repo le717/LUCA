@@ -1,6 +1,16 @@
 LUCA Changes
 ============
 
+1.0.1
+-----
+_Released ?? ??, 2013_
+
+* Added message warning archive may take a while to complete
+* Changed archive statistics to not use the file system
+* Save files with `.tmp` extension before giving them proper file extensions
+* Delete (possibly large) arrays when finished with them
+* Renamed `subfilepath` and variable to `subfolder`
+
 1.0
 ---
 _Released October 12, 2013_

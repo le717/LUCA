@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 
 app = "LUCA"
 majver = "1.0"
-minver = ""
+minver = ".1"
 
 # ------------ Begin Illegal Character Check ------------ #
 
@@ -161,14 +161,18 @@ Rating''', "")
     # These are the first search results
     if not take2:
         memberid = checkUser(username, names, take2=False)
+        del creations[:]
+        del names[:]
         return (memberid, num_of_pages)
 
     # These are the second search results
     elif take2:
         memberid = checkUser(username, names, take2=True)
+        del creations[:]
+        del names[:]
         main(True, memberid=memberid, num_of_pages=num_of_pages,
              localUserName=username)
-        return (memberid, num_of_pages)
+        #return (memberid, num_of_pages)
 
 # ------------ End Username Searches ------------ #
 
@@ -224,11 +228,13 @@ def main(userfound=False, memberid=False, num_of_pages=False,
         localUserName = input("\nEnter your Creation Lab Username: ")
         print('Searching the Creation Lab for user "{0}"'.format(
               localUserName))
+
         # Search for the username on the Creation Lab
         memberid, num_of_pages = searchUser(localUserName, take2=False)
 
-    print("\nYour Creations are now downloading, {0}.\n".format(
+    print("\nYour Creations are now downloading, {0}.".format(
         localUserName))
+    print("NOTE: This may take a while.\n")
 
     # Create folder to save files in,
     # unless it already exists
@@ -239,6 +245,7 @@ def main(userfound=False, memberid=False, num_of_pages=False,
 
     # List of Creations
     creations = []
+    num_of_creation_files = 0
 
     user_url = "http://universe.lego.com/en-us/community/creationlab/displaycreationlist.aspx?memberid={0}&show=48".format(memberid)
     user_r = requests.get(user_url).content
@@ -264,6 +271,7 @@ def main(userfound=False, memberid=False, num_of_pages=False,
                     creations.append('http://universe.lego.com{0}'.format(
                         page_link.get('href')))
 
+    num_of_creations = len(creations)
     for creation in creations:
         r = requests.get(creation).content
         soup = BeautifulSoup(r)
@@ -342,12 +350,12 @@ def main(userfound=False, memberid=False, num_of_pages=False,
         mainfilepath = os.path.join(os.getcwd(), localUserName)
 
         # Check for illegal characters in the creation title
-        subfilepathclean = charCheck(titleString, True)
-        subfilepath = os.path.join(mainfilepath, subfilepathclean)
+        subfolder = charCheck(titleString, True)
+        subfolder = os.path.join(mainfilepath, subfolder)
 
         # If the folder for each Creation does not exist, create it
-        if not os.path.exists(subfilepath):
-            os.makedirs(subfilepath)
+        if not os.path.exists(subfolder):
+            os.makedirs(subfolder)
 
         # List of images in Creation
         image_list = []
@@ -357,64 +365,64 @@ def main(userfound=False, memberid=False, num_of_pages=False,
             img = r.content
 
             # Original filename
-            filename = "{0}{1}".format(titleString, i)
+            filename = "{0}{1}.tmp".format(titleString, i)
 
             # Check for illegal characters in the filenames
             filename = charCheck(filename)
 
             # Write all non-HTML files.
-            with open(os.path.join(subfilepath, filename), 'wb') as newImg:
+            with open(os.path.join(subfolder, filename), 'wb') as newImg:
                 newImg.write(img)
 
             # ------------ Begin File Type Detection ------------ #
 
             #  This is an GIF image
-            if imghdr.what(os.path.join(subfilepath, filename)) == "gif":
-                new_filename = "{0}.gif".format(filename)
-                os.replace(os.path.join(subfilepath, filename),
-                           os.path.join(subfilepath, new_filename))
+            if imghdr.what(os.path.join(subfolder, filename)) == "gif":
+                new_filename = "{0}.gif".format(filename[:-4])
+                os.replace(os.path.join(subfolder, filename),
+                           os.path.join(subfolder, new_filename))
 
             # This is an JPG image
-            elif imghdr.what(os.path.join(subfilepath, filename)) == "jpeg":
-                new_filename = "{0}.jpg".format(filename)
-                os.replace(os.path.join(subfilepath, filename),
-                           os.path.join(subfilepath, new_filename))
+            elif imghdr.what(os.path.join(subfolder, filename)) == "jpeg":
+                new_filename = "{0}.jpg".format(filename[:-4])
+                os.replace(os.path.join(subfolder, filename),
+                           os.path.join(subfolder, new_filename))
 
             else:
                 # Read the first 5 bytes of the file
-                with open(os.path.join(subfilepath, filename), "rb") as f:
+                with open(os.path.join(subfolder, filename), "rb") as f:
                     header = f.readline(5)
 
                 # This is an LDD LXF model <http://ldd.lego.com/>
                 if header == b"PK\x03\x04\x14":
-                    new_filename = "{0}.lxf".format(filename)
-                    os.replace(os.path.join(subfilepath, filename),
-                               os.path.join(subfilepath, new_filename))
+                    new_filename = "{0}.lxf".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
 
                 # This is an WMV video
                 elif header == b"0&\xb2u\x8e":
-                    new_filename = "{0}.wmv".format(filename)
-                    os.replace(os.path.join(subfilepath, filename),
-                               os.path.join(subfilepath, new_filename))
+                    new_filename = "{0}.wmv".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
 
                 # This is an MPG video
                 elif header == b"\x00\x00\x01\xba!":
-                    new_filename = "{0}.mpg".format(filename)
-                    os.replace(os.path.join(subfilepath, filename),
-                               os.path.join(subfilepath, new_filename))
+                    new_filename = "{0}.mpg".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
 
                 # This is an AVI video
                 # NOTE: This was found in an H.264 AVI file
                 elif header == b"\x00\x00\x00\x1cf":
-                    new_filename = "{0}.mpg".format(filename)
-                    os.replace(os.path.join(subfilepath, filename),
-                               os.path.join(subfilepath, new_filename))
+                    new_filename = "{0}.mpg".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
 
                 # This is MOV video
                 else:
-                    new_filename = "{0}.mov".format(filename)
-                    os.replace(os.path.join(subfilepath, filename),
-                               os.path.join(subfilepath, new_filename))
+                    new_filename = "{0}.mov".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
 
                 """
                 The AVI and MOV file type is a container, meaning
@@ -426,6 +434,7 @@ def main(userfound=False, memberid=False, num_of_pages=False,
 
             # Display filename after it was installed,
             # part of LUCA's non-GUI progress bar.
+            num_of_creation_files += 1
             try:
                 print(new_filename)
             # If the filename contains Unicode characters
@@ -435,10 +444,16 @@ def main(userfound=False, memberid=False, num_of_pages=False,
 
             i += 1
             image_list.append(new_filename)
-            img_num = len(image_list)
+        img_num = len(image_list)
+
+        # Original HTML filename
+        HTMLfilename = "{0}.html".format(titleString)
+
+        # Check for illegal characters in the filenames
+        HTMLfilename = charCheck(HTMLfilename)
 
         # HTML document structure
-        page = '''<!-- Creation archive saved by LUCA v{11} on {0} UTC
+        page = '''<!-- Creation archive saved by LUCA v{11}{12} on {0} UTC
 https://github.com/Brickever/LUCA#readme
 https://github.com/le717/LUCA#readme -->
 
@@ -481,17 +496,11 @@ https://github.com/le717/LUCA#readme -->
         }''',
             "a { color: #A9A9A9; text-decoration: none;}",
             title_str, localUserName, challenge, date_str, description_str,
-            majver)
-
-        # Original HTML filename
-        HTMLfilename = "{0}.html".format(titleString)
-
-        # Check for illegal characters in the filenames
-        HTMLfilename = charCheck(HTMLfilename)
+            majver, minver)
 
         # Write initial HTML document structure
         # Write all HTML using binary mode to sooth Unicode characters
-        with open(os.path.join(subfilepath, HTMLfilename), "wb") as newHTML:
+        with open(os.path.join(subfolder, HTMLfilename), "wb") as newHTML:
             newHTML.write(byteme(page))
 
         im = 0
@@ -504,13 +513,13 @@ https://github.com/le717/LUCA#readme -->
 
             # Write the HTML for the images
             with open(os.path.join(
-                      subfilepath, HTMLfilename), "ab") as updateHTML:
+                      subfolder, HTMLfilename), "ab") as updateHTML:
                 updateHTML.write(byteme("{0}".format(img_display)))
             # Display each image once
             im += 1
 
         # Write the final HTML code
-        with open(os.path.join(subfilepath, HTMLfilename), "ab") as finishHTML:
+        with open(os.path.join(subfolder, HTMLfilename), "ab") as finishHTML:
             finishHTML.write(byteme('''
 </div>
 <br>
@@ -530,6 +539,7 @@ Tags
 
         # Display filename after it was installed,
         # part of LUCA's non-GUI progress bar.
+        num_of_creation_files += 1
         try:
             print(HTMLfilename)
         # If the filename contains Unicode characters
@@ -539,41 +549,23 @@ Tags
 
     # ------------ End Creation Writing ------------ #
 
-    # Get list of all downloaded files
-    num_of_files = []
-    for root, dirnames, filenames in os.walk(mainfilepath):
-
-        # Remove Thumbs.db from list
-        if "Thumbs.db" in filenames:
-            filenames.remove("Thumbs.db")
-
-        # Remove ehthumbs.db from list
-        if "ehthumbs.db" in filenames:
-            filenames.remove("ehthumbs.db")
-
-        # Remove Desktop.ini from list
-        if "Desktop.ini" in filenames:
-            filenames.remove("Desktop.ini")
-
-        # How many files were downloaded?
-        for files in filenames:
-            myfiles = os.path.join(root, files)
-            num_of_files.append(myfiles)
-
     # Display success message containing number
     # of files downloaded from number of Creations, and where they were saved.
     print('''
 {0} files from {1} Creations successfully downloaded and saved to
 "{2}"'''.format(
-        len(num_of_files),
-        len(os.listdir(mainfilepath)),
-        mainfilepath))
+        num_of_creation_files, num_of_creations, mainfilepath))
     input("\nPress Enter to close LUCA.")
+
+    # Delete unneeded lists to free up system resources
+    del creations[:]
+    del imgLinkList[:]
+    del image_list[:]
     raise SystemExit(0)
 
     # ------------ End Final Actions ------------ #
 
 if __name__ == "__main__":
     # Write window title
-    os.system("title {0} v{1}".format(app, majver))
+    os.system("title {0} v{1}{2}".format(app, majver, minver))
     main()

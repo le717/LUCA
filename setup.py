@@ -40,9 +40,9 @@ build_exe_options = {"build_exe": destfolder,
 
 setup(
     name="LUCA",
-    version="1.0",
+    version="1.0.1",
     author="Brickever",
-    description="LEGO Universe Creation (Lab) Archiver v1.0",
+    description="LEGO Universe Creation (Lab) Archiver v1.0.1",
     license="GNU GPLv3",
     options={"build_exe": build_exe_options},
     executables=[Executable("LUCA.py", targetName="LUCA.exe")]

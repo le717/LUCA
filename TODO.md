@@ -8,10 +8,11 @@ TODO
 * [ ] ~~Add creation comments to the HTML file~~ (Not possible)
 * [x] Create stylesheet
 * [x] Add a progress bar
-* [-] Accurately get username
+* [x] Accurately get username
 * [x] Multiple pages of Creations
 * [x] ~~**BUG:** Pictures are displayed in reverse order~~ (Fixed)
 * [x] Fix display of tags
+* [-] Skip already downloaded files
 
 ### Legend ###
 * [ ] ---> Todo
