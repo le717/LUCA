@@ -68,6 +68,7 @@ def charCheck(text, folders=False):
         for char in found_chars:
             # Replace it (them) with a space
             text = text.replace(char, "-")
+    del found_chars[:]
     return text
 
 # ------------ End Illegal Character Check ------------ #
@@ -93,40 +94,9 @@ def searchUser(username, take2=False):
     r = requests.get(url).content
     soup = BeautifulSoup(r)
 
-    # Find area containing number of pages
-    num_of_pages = soup.find("p", class_="column-navigation").get_text()
+    #num_of_pages = pageme(soup)
 
-    # Remove unneeded text: part 1
-    num_of_pages = num_of_pages.replace('''
-\t\t\t\t\t\t»
-Show:
-
-12
-24
-36
-48
-
-Order:
-
-Most Recent
-Oldest
-Rating''', "")
-
-    # Remove unneeded text: part 2
-    num_of_pages = num_of_pages.replace('''\r
-\t\t\t\t\t\t\xad\r
-\t\t\t\t\t\t«\r
-\t\t\t\t\t\t\t\r
-\t\t\t\t\t\t''', "")
-
-    # Remove unneeded text: part 3
-    num_of_pages = num_of_pages.replace("\r\n\t\t\t\t\t\t\r\n\n", "")
-    num_of_pages = num_of_pages.replace("1 of ", "")
-
-    # Convert the number to an integer
-    num_of_pages = int(num_of_pages)
-
-    # Holding pen for  possible Creations by the user
+    # Holding pen for possible Creations by the user
     creations = []
 
     # Gather the creations from the page
@@ -136,7 +106,7 @@ Rating''', "")
                 link.get('href')))
 
     if not creations:
-        # Not Creations were found on first search
+        # No Creations were found on first search
         if not take2:
             searchUser(username, take2=True)
 
@@ -163,16 +133,15 @@ Rating''', "")
         memberid = checkUser(username, names, take2=False)
         del creations[:]
         del names[:]
-        return (memberid, num_of_pages)
+        return memberid
 
     # These are the second search results
     elif take2:
         memberid = checkUser(username, names, take2=True)
         del creations[:]
         del names[:]
-        main(True, memberid=memberid, num_of_pages=num_of_pages,
-             localUserName=username)
-        #return (memberid, num_of_pages)
+        main(True, memberid=memberid, localUserName=username)
+        #return memberid
 
 # ------------ End Username Searches ------------ #
 
@@ -215,14 +184,44 @@ def checkUser(locuser, webusers, take2=False):
 # ------------ End Username Checks ------------ #
 
 
+# ------------ Begin Page Number Gathering and Text --> Binary ------------ #
+
+
+def pageme(soup):
+    """Get the number of pages the Creations are on"""
+    # Find area containing number of pages
+    num_of_pages = soup.find("p", class_="column-navigation").get_text()
+
+    # Remove unneeded text: part 1
+    num_of_pages = num_of_pages.replace('''\r
+\t\t\t\t\t\t\r\n\t\t\t\t\t\t»\nShow:\n\n12\n24\n36\n48\n\nOrder:
+\nMost Recent\nOldest\nRating\n\n''', "")
+
+    # Remove unneeded text: part 2
+    num_of_pages = num_of_pages.replace('''\r
+\t\t\t\t\t\t\xad\r
+\t\t\t\t\t\t«\r
+\t\t\t\t\t\t\t\r
+\t\t\t\t\t\t''', "")
+
+    # Remove unneeded text: part 3
+    num_of_pages = num_of_pages.replace("\r\n\t\t\t\t\t\t\r\n\n", "")
+    num_of_pages = num_of_pages.replace("1 of ", "")
+
+    # Convert the number to an integer
+    num_of_pages = int(num_of_pages)
+    return num_of_pages
+
+
 def byteme(text):
     """Convert text to binary"""
     bin_text = str.encode(text, encoding="utf-8", errors="strict")
     return bin_text
 
+# ------------ End Page Number Gathering and Text --> Binary ------------ #
 
-def main(userfound=False, memberid=False, num_of_pages=False,
-         localUserName=False):
+
+def main(userfound=False, memberid=False, localUserName=False):
     """Main LUCA Process"""
     if not userfound:
         localUserName = input("\nEnter your Creation Lab Username: ")
@@ -230,7 +229,7 @@ def main(userfound=False, memberid=False, num_of_pages=False,
               localUserName))
 
         # Search for the username on the Creation Lab
-        memberid, num_of_pages = searchUser(localUserName, take2=False)
+        memberid = searchUser(localUserName, take2=False)
 
     print("\nYour Creations are now downloading, {0}.".format(
         localUserName))
@@ -247,9 +246,13 @@ def main(userfound=False, memberid=False, num_of_pages=False,
     creations = []
     num_of_creation_files = 0
 
-    user_url = "http://universe.lego.com/en-us/community/creationlab/displaycreationlist.aspx?memberid={0}&show=48".format(memberid)
+    user_url = "http://universe.lego.com/en-us/community/creationlab/displaycreationlist.aspx?memberid={0}&show=48&page=1".format(memberid)
     user_r = requests.get(user_url).content
     user_soup = BeautifulSoup(user_r)
+
+    # Get the number of pages the Creations are spread out on
+    num_of_pages = pageme(user_soup)
+
     # Add the creations from page 1 to the list
     for user_link in user_soup.find_all('a'):
         if user_link.get('href')[0:49] == "/en-us/Community/CreationLab/DisplayCreation.aspx":
@@ -259,32 +262,45 @@ def main(userfound=False, memberid=False, num_of_pages=False,
     # If there is more than one page of Creations,
     # add the creations from the other pages to the list
     if num_of_pages > 1:
-        new_url = user_url[:-1]
-        while num_of_pages != 0:
-            page_url = "{0}{1}".format(new_url, num_of_pages)
-            num_of_pages -= 1
 
+        # Multiple page URL skeleton
+        page_url = "{0}{1}".format(user_url[:-1], num_of_pages)
+
+        # Update the page number (in reverse)
+        while num_of_pages != 0:
+
+            # Properly reconstruct the page number URL
+            if len(str(num_of_pages)) > 1:
+                new_url = page_url[:-2]
+            else:
+                new_url = page_url[:-1]
+                page_url = "{0}{1}".format(new_url, num_of_pages)
+
+            # Add the Creations from each page to the list
             req = requests.get(page_url).content
             soup = BeautifulSoup(req)
             for page_link in soup.find_all('a'):
                 if page_link.get('href')[0:49] == "/en-us/Community/CreationLab/DisplayCreation.aspx":
                     creations.append('http://universe.lego.com{0}'.format(
                         page_link.get('href')))
+            num_of_pages -= 1
 
+    # Get the number of Creations, copy value for later usage
     num_of_creations = len(creations)
-    for creation in creations:
-        r = requests.get(creation).content
+    number_of_fun = num_of_creations
+
+    while num_of_creations > 0:
+        r = requests.get(creations[num_of_creations - 1]).content
         soup = BeautifulSoup(r)
 
         title = soup.find_all('h1')[2]
-        # add .string to get only the text
+        # Add .string to get only the text
         titleString = title.string
         titleString = titleString.replace('/', '')
         titleString = titleString.strip()
         description = soup.find(id="creationInfoText")
         tags = soup.find_all(class_='column-round-body')[3].contents[9]
         challenge = soup.find(id="CreationChallenge").contents[1].contents[1]
-
         date = soup.find(id="CreationUser")
 
         # Adapt date line for Labs from LEGO Universe competitions
@@ -325,6 +341,7 @@ def main(userfound=False, memberid=False, num_of_pages=False,
     ''', "")
         if lucl:
             date_str = date_str.replace('<div class="column-round-body" id="CreationUser">', "")
+        #FIXME: it be not working properly
         tags_str = tags_str.replace(r'<a href="',
                                     r'<<a target="_blank" href="http://universe.lego.com/en-us/community/creationlab/')
         date_str = date_str.replace(r"</div>", "")
@@ -347,11 +364,11 @@ def main(userfound=False, memberid=False, num_of_pages=False,
         # ------------ Begin Creation Writing ------------ #
 
         # The folders to which the creations will be saved
-        mainfilepath = os.path.join(os.getcwd(), localUserName)
+        mainfolder = os.path.join(os.getcwd(), localUserName)
 
         # Check for illegal characters in the creation title
         subfolder = charCheck(titleString, True)
-        subfolder = os.path.join(mainfilepath, subfolder)
+        subfolder = os.path.join(mainfolder, subfolder)
 
         # If the folder for each Creation does not exist, create it
         if not os.path.exists(subfolder):
@@ -365,7 +382,7 @@ def main(userfound=False, memberid=False, num_of_pages=False,
             img = r.content
 
             # Original filename
-            filename = "{0}{1}.tmp".format(titleString, i)
+            filename = "{0}-{1}.tmp".format(titleString, i)
 
             # Check for illegal characters in the filenames
             filename = charCheck(filename)
@@ -434,7 +451,6 @@ def main(userfound=False, memberid=False, num_of_pages=False,
 
             # Display filename after it was installed,
             # part of LUCA's non-GUI progress bar.
-            num_of_creation_files += 1
             try:
                 print(new_filename)
             # If the filename contains Unicode characters
@@ -442,6 +458,8 @@ def main(userfound=False, memberid=False, num_of_pages=False,
                 print("Filename display error. Creation saved!")
                 pass
 
+            # Update various values
+            num_of_creation_files += 1
             i += 1
             image_list.append(new_filename)
         img_num = len(image_list)
@@ -535,17 +553,19 @@ Tags
 {1}
 </body>
 </html>
-    '''.format(creation, tags_str)))
+    '''.format(creations[num_of_creations - 1], tags_str)))
 
         # Display filename after it was installed,
         # part of LUCA's non-GUI progress bar.
-        num_of_creation_files += 1
         try:
             print(HTMLfilename)
         # If the filename contains Unicode characters
         except UnicodeEncodeError:
             print("Filename display error. Creation saved!")
             pass
+        # Update various values
+        num_of_creation_files += 1
+        num_of_creations -= 1
 
     # ------------ End Creation Writing ------------ #
 
@@ -553,8 +573,7 @@ Tags
     # of files downloaded from number of Creations, and where they were saved.
     print('''
 {0} files from {1} Creations successfully downloaded and saved to
-"{2}"'''.format(
-        num_of_creation_files, num_of_creations, mainfilepath))
+"{2}"'''.format(num_of_creation_files, number_of_fun, mainfolder))
     input("\nPress Enter to close LUCA.")
 
     # Delete unneeded lists to free up system resources
