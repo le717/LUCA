@@ -14,6 +14,7 @@ _Released October 1?, 2013_
 * Moved process to get number of pages to separate function
 * Renamed `mainfilepath`  variable to `mainfolder`
 * Fixed bug issues with no more than 72 Creations being downloaded
+* Various cleanup
 
 1.0
 ---
