@@ -3,7 +3,7 @@ LUCA Changes
 
 1.0.1
 -----
-_Released October 1?, 2013_
+_Released October 15, 2013_
 
 * Added message warning archive may take a while to complete
 * Changed archive statistics to not use the file system

@@ -385,115 +385,116 @@ def main(userfound=False, memberid=False, localUserName=False):
             # Check for illegal characters in the filenames
             filename = charCheck(filename)
 
-            #os.chdir(subfolder)
-            #print(os.getcwd())
-            mylist = os.listdir(subfolder)
-            len_mylist = len(mylist) - 1
-            while len_mylist != -1:
-                if mylist[len_mylist].endswith("html"):
-                    del mylist[len_mylist]
-                len_mylist -= 1
+            #FIXME: Complete skipping code
+            ##os.chdir(subfolder)
+            ##print(os.getcwd())
+            #mylist = os.listdir(subfolder)
+            #len_mylist = len(mylist) - 1
+            #while len_mylist != -1:
+                #if mylist[len_mylist].endswith("html"):
+                    #del mylist[len_mylist]
+                #len_mylist -= 1
 
-            mylist2 = []
-            for item in mylist:
-                #if not item.endswith("html"):
-                mylist2.append(item[:-4])
+            #mylist2 = []
+            #for item in mylist:
+                ##if not item.endswith("html"):
+                #mylist2.append(item[:-4])
             #print(mylist)
             #
             #print(image_list)
             #print("\n\n", mylist2)
             #raise SystemExit(0)
 
-            if filename[:-4] in mylist2:
-                for ima in mylist:
-                    if ima not in image_list:
-                        image_list.append(ima)
-                        #num_of_creation_files += 1
-                        #i += 1
+            #if filename[:-4] in mylist2:
+                #for ima in mylist:
+                    #if ima not in image_list:
+                        #image_list.append(ima)
+                        ##num_of_creation_files += 1
+                        ##i += 1
 
-                print(mylist)
-                print(image_list)
+                #print(mylist)
+                #print(image_list)
 
-            elif not filename[:-4] in mylist2:
-                print("not exists")
-                #i -= 1
+            #elif not filename[:-4] in mylist2:
+                #print("not exists")
+                ##i -= 1
 
-                # Write all non-HTML files.
-                with open(os.path.join(subfolder, filename), 'wb') as newImg:
-                    newImg.write(img)
+            # Write all non-HTML files.
+            with open(os.path.join(subfolder, filename), 'wb') as newImg:
+                newImg.write(img)
 
-                # ------------ Begin File Type Detection ------------ #
+            # ------------ Begin File Type Detection ------------ #
 
-                #  This is an GIF image
-                if imghdr.what(os.path.join(subfolder, filename)) == "gif":
-                    new_filename = "{0}.gif".format(filename[:-4])
+            #  This is an GIF image
+            if imghdr.what(os.path.join(subfolder, filename)) == "gif":
+                new_filename = "{0}.gif".format(filename[:-4])
+                os.replace(os.path.join(subfolder, filename),
+                           os.path.join(subfolder, new_filename))
+
+            # This is an JPG image
+            elif imghdr.what(os.path.join(subfolder, filename)) == "jpeg":
+                new_filename = "{0}.jpg".format(filename[:-4])
+                os.replace(os.path.join(subfolder, filename),
+                           os.path.join(subfolder, new_filename))
+
+            else:
+                # Read the first 5 bytes of the file
+                with open(os.path.join(subfolder, filename), "rb") as f:
+                    header = f.readline(5)
+
+                # This is an LDD LXF model <http://ldd.lego.com/>
+                if header == b"PK\x03\x04\x14":
+                    new_filename = "{0}.lxf".format(filename[:-4])
                     os.replace(os.path.join(subfolder, filename),
                                os.path.join(subfolder, new_filename))
 
-                # This is an JPG image
-                elif imghdr.what(os.path.join(subfolder, filename)) == "jpeg":
-                    new_filename = "{0}.jpg".format(filename[:-4])
+                # This is an WMV video
+                elif header == b"0&\xb2u\x8e":
+                    new_filename = "{0}.wmv".format(filename[:-4])
                     os.replace(os.path.join(subfolder, filename),
                                os.path.join(subfolder, new_filename))
 
+                # This is an MPG video
+                elif header == b"\x00\x00\x01\xba!":
+                    new_filename = "{0}.mpg".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
+
+                # This is an AVI video
+                # NOTE: This was found in an H.264 AVI file
+                elif header == b"\x00\x00\x00\x1cf":
+                    new_filename = "{0}.mpg".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
+
+                # This is MOV video
                 else:
-                    # Read the first 5 bytes of the file
-                    with open(os.path.join(subfolder, filename), "rb") as f:
-                        header = f.readline(5)
+                    new_filename = "{0}.mov".format(filename[:-4])
+                    os.replace(os.path.join(subfolder, filename),
+                               os.path.join(subfolder, new_filename))
 
-                    # This is an LDD LXF model <http://ldd.lego.com/>
-                    if header == b"PK\x03\x04\x14":
-                        new_filename = "{0}.lxf".format(filename[:-4])
-                        os.replace(os.path.join(subfolder, filename),
-                                   os.path.join(subfolder, new_filename))
+                """
+                The AVI and MOV file type is a container, meaning
+                different types of codecs (what the real format is) can vary.
+                Becauase of this, AVI and MOV file detection is a bit fuzzy.
+                """
 
-                    # This is an WMV video
-                    elif header == b"0&\xb2u\x8e":
-                        new_filename = "{0}.wmv".format(filename[:-4])
-                        os.replace(os.path.join(subfolder, filename),
-                                   os.path.join(subfolder, new_filename))
+                # ------------ End File Type Detection ------------ #
 
-                    # This is an MPG video
-                    elif header == b"\x00\x00\x01\xba!":
-                        new_filename = "{0}.mpg".format(filename[:-4])
-                        os.replace(os.path.join(subfolder, filename),
-                                   os.path.join(subfolder, new_filename))
+            # Display filename after it was installed,
+            # part of LUCA's non-GUI progress bar.
+            try:
+                print(new_filename)
+            # If the filename contains Unicode characters
+            except UnicodeEncodeError:
+                print("Filename display error. Creation saved!")
+                pass
 
-                    # This is an AVI video
-                    # NOTE: This was found in an H.264 AVI file
-                    elif header == b"\x00\x00\x00\x1cf":
-                        new_filename = "{0}.mpg".format(filename[:-4])
-                        os.replace(os.path.join(subfolder, filename),
-                                   os.path.join(subfolder, new_filename))
-
-                    # This is MOV video
-                    else:
-                        new_filename = "{0}.mov".format(filename[:-4])
-                        os.replace(os.path.join(subfolder, filename),
-                                   os.path.join(subfolder, new_filename))
-
-                    """
-                    The AVI and MOV file type is a container, meaning
-                    different types of codecs (what the real format is) can vary.
-                    Becauase of this, AVI and MOV file detection is a bit fuzzy.
-                    """
-
-                    # ------------ End File Type Detection ------------ #
-
-                # Display filename after it was installed,
-                # part of LUCA's non-GUI progress bar.
-                try:
-                    print(new_filename)
-                # If the filename contains Unicode characters
-                except UnicodeEncodeError:
-                    print("Filename display error. Creation saved!")
-                    pass
-
-                # Update various values
-                num_of_creation_files += 1
-                i += 1
-                image_list.append(new_filename)
-            img_num = len(image_list)
+            # Update various values
+            num_of_creation_files += 1
+            i += 1
+            image_list.append(new_filename)
+        img_num = len(image_list)
 
         # Original HTML filename
         HTMLfilename = "{0}.html".format(titleString)
