@@ -2,6 +2,7 @@ LUCA Changes
 ============
 
 1.0.2
+-----
 _Released October 16, 2013_
 
 * Fixed issue with URL parser not properly adding multi-paged Creations for download
