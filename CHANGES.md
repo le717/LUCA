@@ -1,12 +1,18 @@
 LUCA Changes
 ============
 
+1.0.2
+_Released October 16, 2013_
+
+* Fixed issue with URL parser not properly adding multi-paged Creations for download
+* Minor tag fixes
+
 1.0.1
 -----
 _Released October 15, 2013_
 
-* Added message warning archive may take a while to complete
-* Changed archive statistics to not use the file system
+* Added message warning download may take a while to complete
+* Changed download statistics to not use the file system
 * Save files with `.tmp` extension before giving them proper file extensions
 * Delete (possibly large) arrays when finished with them
 * Renamed `subfilepath` variable to `subfolder`

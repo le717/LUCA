@@ -265,13 +265,21 @@ def main(userfound=False, memberid=False, localUserName=False):
         while num_of_pages != 0:
 
             # Properly reconstruct the page number URL
-            if len(str(num_of_pages)) > 1:
+            # There are more than 9 pages
+            if len(str(num_of_pages)) >= 2:
                 new_url = page_url[:-2]
-            else:
-                new_url = page_url[:-1]
-                page_url = "{0}{1}".format(new_url, num_of_pages)
+
+            # There are 9 or less pages
+            elif len(str(num_of_pages)) == 1:
+
+                # Make sure we are updating the page number correctly
+                if page_url[-2] != "=":
+                    new_url = page_url[:-2]
+                else:
+                    new_url = page_url[:-1]
 
             # Add the Creations from each page to the list
+            page_url = "{0}{1}".format(new_url, num_of_pages)
             req = requests.get(page_url).content
             soup = BeautifulSoup(req)
             for page_link in soup.find_all('a'):
@@ -285,7 +293,6 @@ def main(userfound=False, memberid=False, localUserName=False):
     number_of_fun = num_of_creations
 
     while num_of_creations > 0:
-
         r = requests.get(creations[num_of_creations - 1]).content
         soup = BeautifulSoup(r)
 
@@ -337,11 +344,13 @@ def main(userfound=False, memberid=False, localUserName=False):
     ''', "")
         if lucl:
             date_str = date_str.replace('<div class="column-round-body" id="CreationUser">', "")
-        #FIXME: it be not working properly
         tags_str = tags_str.replace(r'href="',
                                     r'target="_blank" href="http://universe.lego.com/en-us/community/creationlab/')
-        if not tags_str.startswith("<"):
-            tags_str = "<{0}".format(tags_str)
+        # If there are tags present, fix the first URL
+        if tags_str != "":
+            if not tags_str.startswith("<"):
+                tags_str = "<{0}".format(tags_str)
+        # Remove leftover closing div tag
         date_str = date_str.replace(r"</div>", "")
 
         # ------------ End Original HTML Updates ------------ #
@@ -569,7 +578,6 @@ https://github.com/le717/LUCA#readme -->
             im += 1
 
         # Write the final HTML code
-        #FIXME: it be not working properly 2
         with open(os.path.join(subfolder, HTMLfilename), "ab") as finishHTML:
             finishHTML.write(byteme('''
 </div>
