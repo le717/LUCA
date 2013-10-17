@@ -23,6 +23,7 @@
 # LUCA setup script using cx_Freeze.
 from cx_Freeze import (setup, Executable)
 import sys
+from LUCA import (majver, minver)
 
 # Freeze into the proper folder depending on the architecture
 if sys.maxsize == 2147483647:
@@ -40,10 +41,12 @@ build_exe_options = {"build_exe": destfolder,
 
 setup(
     name="LUCA",
-    version="1.0.1",
+    version="{0}{1}".format(majver, minver),
     author="Brickever",
-    description="LEGO Universe Creation (Lab) Archiver v1.0.1",
-    license="GNU GPLv3",
+    description="LEGO Universe Creation (Lab) Archiver",
+    license="GPLv3",
     options={"build_exe": build_exe_options},
     executables=[Executable("LUCA.py", targetName="LUCA.exe")]
 )
+
+
