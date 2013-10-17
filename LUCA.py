@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 
 app = "LUCA"
 majver = "1.0"
-minver = ".1"
+minver = ".2"
 
 # ------------ Begin Illegal Character Check ------------ #
 
