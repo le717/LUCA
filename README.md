@@ -14,7 +14,7 @@ Prerequisites
 
 Authors
 -------
-* Brickever
+* [@Brickever](https://github.com/Brickever)
 * [Triangle717](https://github.com/le717)
 * [@rioforce](https://github.com/rioforce)
 
