@@ -1,12 +1,20 @@
 LUCA Changes
 ============
 
+1.0.3
+-----
+_Released October ??, 2013_
+
+* Better display of datestamp
+* Import `argparse` module for command-line arguments
+
 1.0.2
 -----
 _Released October 16, 2013_
 
 * Fixed issue with URL parser not properly adding multi-paged Creations for download
 * Minor tag fixes
+* Use version number from `LUCA.py` when freezing
 
 1.0.1
 -----

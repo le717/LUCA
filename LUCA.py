@@ -22,12 +22,13 @@
 import os
 import time
 import imghdr
+import argparse
 import requests
 from bs4 import BeautifulSoup
 
 app = "LUCA"
 majver = "1.0"
-minver = ".2"
+minver = ".3"
 
 # ------------ Begin Illegal Character Check ------------ #
 
@@ -306,7 +307,7 @@ def main(userfound=False, memberid=False, localUserName=False):
         challenge = soup.find(id="CreationChallenge").contents[1].contents[1]
         date = soup.find(id="CreationUser")
 
-        # Adapt date line for Labs from LEGO Universe competitions
+        # Adapt date line for Labs from LEGO Universe contest
         try:
             date.div.decompose()
             lucl = True
@@ -326,15 +327,20 @@ def main(userfound=False, memberid=False, localUserName=False):
 
         # ------------ Begin Original HTML Updates ------------ #
 
+        # Clean up Creation title
         title_str = title_str.replace("</h1>", "")
         title_str = '{0} - Created by <a target="_blank" href="{1}{2}.aspx">{2}</a></h1>'.format(
             title_str, "http://mln.lego.com/en-us/PublicView/", localUserName)
+
+        # Clean up Creation description
         description_str = description_str.replace("</br></br></br></br></br></br>", "")
         description_str = description_str.replace("\t\t\t\t\t\t\t\t\t", "")
         description_str = description_str.replace('''
     \t\t\t\t\t\t\t\t''', "")
         tags_str = tags_str.lstrip('''<p>
     </p>''')
+
+        # Clean up Creation date
         date_str = date_str.replace("\t\t\t\t\t\t\t\t\t", "")
         date_str = date_str.replace("<br/>", "")
         date_str = date_str.replace("\t\t\t\t\t\t\t\t", "")
@@ -342,16 +348,22 @@ def main(userfound=False, memberid=False, localUserName=False):
     <p>''', "")
         date_str = date_str.replace('''
     ''', "")
+        date_str = date_str.replace("\n<p>\n\n\r\n", "")
+        date_str = date_str.replace("\r\n", "")
+        date_str = date_str.replace("\n", "")
+        # Remove leftover closing div tag
+        date_str = date_str.replace(r"</div>", "")
+
+        # Remove code only from pages from a LEGO Universe contest
         if lucl:
             date_str = date_str.replace('<div class="column-round-body" id="CreationUser">', "")
         tags_str = tags_str.replace(r'href="',
                                     r'target="_blank" href="http://universe.lego.com/en-us/community/creationlab/')
+
         # If there are tags present, fix the first URL
         if tags_str != "":
             if not tags_str.startswith("<"):
                 tags_str = "<{0}".format(tags_str)
-        # Remove leftover closing div tag
-        date_str = date_str.replace(r"</div>", "")
 
         # ------------ End Original HTML Updates ------------ #
 
@@ -375,9 +387,20 @@ def main(userfound=False, memberid=False, localUserName=False):
 
         # Check for illegal characters in the creation title
         subfolder = charCheck(titleString, True)
-        subfolder = os.path.join(mainfolder, subfolder)
+
+        # If the --date parameter was give, cleanup the datestamp
+        # so it can be used in folder names
+        if foldate:
+            date_str = date_str.replace("\n<p>\n\n\r\n", "")
+            date_str = date_str.replace("\r\n</p>\n", "")
+            date_str = date_str.replace("</p>", "")
+
+            # Define the folder name
+            subfolder = os.path.join(mainfolder, "{0} {1}".format(
+                date_str, subfolder))
 
         # If the folder for each Creation does not exist, create it
+        subfolder = os.path.join(mainfolder, subfolder)
         if not os.path.exists(subfolder):
             os.makedirs(subfolder)
 
@@ -626,6 +649,22 @@ Tags
     # ------------ End Final Actions ------------ #
 
 if __name__ == "__main__":
+    # Command-line Arguments parser
+    parser = argparse.ArgumentParser(
+    description="{0} {1}{2} Command-line Arguments".format(
+       app, majver, minver))
+
+    # Save folders with creation date argument
+    parser.add_argument("-d", "--date",
+                        help='''Append Creation dates to folder names''',
+                        action="store_true")
+
+    # Register all the parameters
+    args = parser.parse_args()
+
+    # Declare parameters
+    foldate = args.date
+
     # Write window title
     os.system("title {0} v{1}{2}".format(app, majver, minver))
     main()
