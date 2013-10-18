@@ -9,6 +9,10 @@ _Released October ??, 2013_
 * Import `argparse` module for command-line arguments
 * Remove spaces in folder and file names
 * Added command-line option (`-d`, `--date`) to append folders with Creation date, formatting as `YYYY-DD-MM`
+* Remove periods from file names
+* Run illegal character check before constructing file/folder names
+* Fixed issue with URL parser adding Creations from page 1 when there are more then 1 pages twice
+(also fixes issue with download statistics reporting too many Creations and files downloaded)
 
 1.0.2
 -----

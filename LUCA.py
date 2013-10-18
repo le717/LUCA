@@ -37,14 +37,10 @@ minver = ".3"
 def charCheck(text, folders=False):
     """Checks for illegal characters in text"""
     # List of illegal characters for filenames
-    illegal_chars = ["\\", "/", ":", "*", "?", '"', "'", "<", ">", "|", " "]
-
-    # Whitelist periods for folder names
-    if folders:
-        illegal_chars.append(".")
+    illegal_chars = [
+        "\\", "/", ":", "*", "?", '"', "'", "<", ">", "|", " ", "."]
 
     found_chars = []
-
     # Get the length of the text, minus one for proper indexing
     len_of_text = len(text) - 1
 
@@ -266,7 +262,7 @@ def main(userfound=False, memberid=False, localUserName=False):
         page_url = "{0}{1}".format(user_url[:-1], num_of_pages)
 
         # Update the page number (in reverse)
-        while num_of_pages != 0:
+        while num_of_pages != 1:
 
             # Properly reconstruct the page number URL
             # There are more than 9 pages
@@ -296,6 +292,7 @@ def main(userfound=False, memberid=False, localUserName=False):
     num_of_creations = len(creations)
     number_of_fun = num_of_creations
 
+    # While there are still Creations to download
     while num_of_creations > 0:
         r = requests.get(creations[num_of_creations - 1]).content
         soup = BeautifulSoup(r)
@@ -420,11 +417,11 @@ def main(userfound=False, memberid=False, localUserName=False):
             r = requests.get(imgLink)
             img = r.content
 
-            # Original filename
-            filename = "{0}-{1}.tmp".format(titleString, i)
-
             # Check for illegal characters in the filenames
-            filename = charCheck(filename)
+            filename = charCheck(titleString)
+
+            # Original filename
+            filename = "{0}-{1}.tmp".format(filename, i)
 
             #FIXME: Complete skipping code
             ##os.chdir(subfolder)
@@ -537,11 +534,11 @@ def main(userfound=False, memberid=False, localUserName=False):
             image_list.append(new_filename)
         img_num = len(image_list)
 
-        # Original HTML filename
-        HTMLfilename = "{0}.html".format(titleString)
-
         # Check for illegal characters in the filenames
-        HTMLfilename = charCheck(HTMLfilename)
+        HTMLfilename = charCheck(titleString)
+
+        # Original HTML filename
+        HTMLfilename = "{0}.html".format(HTMLfilename)
 
         # HTML document structure
         page = '''<!-- Creation archive saved by LUCA v{11}{12} on {0} UTC
