@@ -23,6 +23,7 @@ import os
 import time
 import imghdr
 import argparse
+import datetime
 import requests
 from bs4 import BeautifulSoup
 
@@ -38,8 +39,11 @@ def charCheck(text, folders=False):
     # List of illegal characters for filenames
     illegal_chars = ["\\", "/", ":", "*", "?", '"', "'", "<", ">", "|"]
 
+    # Add periods and spaces for folder names
     if folders:
         illegal_chars.append(".")
+        illegal_chars.append(" ")
+
     found_chars = []
 
     # Get the length of the text, minus one for proper indexing
@@ -391,9 +395,15 @@ def main(userfound=False, memberid=False, localUserName=False):
         # If the --date parameter was give, cleanup the datestamp
         # so it can be used in folder names
         if foldate:
+
+            # Remove characters that are prohibitied in folder names
             date_str = date_str.replace("\n<p>\n\n\r\n", "")
             date_str = date_str.replace("\r\n</p>\n", "")
             date_str = date_str.replace("</p>", "")
+
+            # Convert date to  YYYY-DD-MM format, remove timestamp
+            date_str = datetime.datetime.strptime(date_str, "%d %B %Y")
+            date_str = str(date_str).rstrip(" 00:00:00")
 
             # Define the folder name
             subfolder = os.path.join(mainfolder, "{0} {1}".format(
