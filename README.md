@@ -26,7 +26,7 @@ Usage
 -----
 
 * `LUCA.exe` for normally named folders
-* `LUCA.exe -d` for timestamped folders
+* `LUCA.exe -d` (or `LUCA.exe --date`) for timestamped folders
 
 License
 -------

@@ -7,7 +7,7 @@ _Released October ??, 2013_
 
 * Better display of date
 * Import `argparse` module for command-line arguments
-* Remove spaces in folder names
+* Remove spaces in folder and file names
 * Added command-line option (`-d`, `--date`) to append folders with Creation date, formatting as `YYYY-DD-MM`
 
 1.0.2

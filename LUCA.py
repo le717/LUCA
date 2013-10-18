@@ -37,12 +37,11 @@ minver = ".3"
 def charCheck(text, folders=False):
     """Checks for illegal characters in text"""
     # List of illegal characters for filenames
-    illegal_chars = ["\\", "/", ":", "*", "?", '"', "'", "<", ">", "|"]
+    illegal_chars = ["\\", "/", ":", "*", "?", '"', "'", "<", ">", "|", " "]
 
-    # Add periods and spaces for folder names
+    # Whitelist periods for folder names
     if folders:
         illegal_chars.append(".")
-        illegal_chars.append(" ")
 
     found_chars = []
 
@@ -401,12 +400,12 @@ def main(userfound=False, memberid=False, localUserName=False):
             date_str = date_str.replace("\r\n</p>\n", "")
             date_str = date_str.replace("</p>", "")
 
-            # Convert date to  YYYY-DD-MM format, remove timestamp
+            # Convert date to YYYY-DD-MM format, remove timestamp
             date_str = datetime.datetime.strptime(date_str, "%d %B %Y")
             date_str = str(date_str).rstrip(" 00:00:00")
 
             # Define the folder name
-            subfolder = os.path.join(mainfolder, "{0} {1}".format(
+            subfolder = os.path.join(mainfolder, "{0}-{1}".format(
                 date_str, subfolder))
 
         # If the folder for each Creation does not exist, create it
