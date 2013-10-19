@@ -5,13 +5,12 @@ LUCA Changes
 -----
 _Released October ??, 2013_
 
-* Better display of date
-* Import `argparse` module for command-line arguments
+* Better display of Creationdate
 * Remove spaces in folder and file names
-* Added command-line option (`-d`, `--date`) to append folders with Creation date, formatting as `YYYY-DD-MM`
+* Added `argparse` based command-line rgument (`-d`, `--date`) to append folders with Creation date, formatted as `YYYY-DD-MM`
 * Remove periods from file names
 * Run illegal character check before constructing file/folder names
-* Fixed issue with URL parser adding Creations from page 1 when there are more then 1 pages twice
+* Fixed issue with URL parser adding Creations from page 1 twice when there are more then 1 pages
 (also fixes issue with download statistics reporting too many Creations and files downloaded)
 
 1.0.2

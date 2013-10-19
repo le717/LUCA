@@ -388,7 +388,7 @@ def main(userfound=False, memberid=False, localUserName=False):
         # Check for illegal characters in the creation title
         subfolder = charCheck(titleString, True)
 
-        # If the --date parameter was give, cleanup the datestamp
+        # If the --date parameter was given, cleanup the datestamp
         # so it can be used in folder names
         if foldate:
 
@@ -422,40 +422,6 @@ def main(userfound=False, memberid=False, localUserName=False):
 
             # Original filename
             filename = "{0}-{1}.tmp".format(filename, i)
-
-            #FIXME: Complete skipping code
-            ##os.chdir(subfolder)
-            ##print(os.getcwd())
-            #mylist = os.listdir(subfolder)
-            #len_mylist = len(mylist) - 1
-            #while len_mylist != -1:
-                #if mylist[len_mylist].endswith("html"):
-                    #del mylist[len_mylist]
-                #len_mylist -= 1
-
-            #mylist2 = []
-            #for item in mylist:
-                ##if not item.endswith("html"):
-                #mylist2.append(item[:-4])
-            #print(mylist)
-            #
-            #print(image_list)
-            #print("\n\n", mylist2)
-            #raise SystemExit(0)
-
-            #if filename[:-4] in mylist2:
-                #for ima in mylist:
-                    #if ima not in image_list:
-                        #image_list.append(ima)
-                        ##num_of_creation_files += 1
-                        ##i += 1
-
-                #print(mylist)
-                #print(image_list)
-
-            #elif not filename[:-4] in mylist2:
-                #print("not exists")
-                ##i -= 1
 
             # Write all non-HTML files.
             with open(os.path.join(subfolder, filename), 'wb') as newImg:
@@ -532,7 +498,6 @@ def main(userfound=False, memberid=False, localUserName=False):
             num_of_creation_files += 1
             i += 1
             image_list.append(new_filename)
-        img_num = len(image_list)
 
         # Check for illegal characters in the filenames
         HTMLfilename = charCheck(titleString)
@@ -592,6 +557,7 @@ https://github.com/le717/LUCA#readme -->
             newHTML.write(byteme(page))
 
         im = 0
+        img_num = len(image_list)
         while im < img_num:
 
             # Code to display every image
@@ -657,8 +623,9 @@ Tags
 if __name__ == "__main__":
     # Command-line Arguments parser
     parser = argparse.ArgumentParser(
-    description="{0} {1}{2} Command-line Arguments".format(
-       app, majver, minver))
+        description="{0} {1}{2} Command-line Arguments".format(
+            app, majver, minver)
+    )
 
     # Save folders with creation date argument
     parser.add_argument("-d", "--date",
