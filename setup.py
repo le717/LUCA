@@ -19,8 +19,8 @@
     You should have received a copy of the GNU General Public License
     along with LUCA If not, see <http://www.gnu.org/licenses/>.
 """
-
 # LUCA setup script using cx_Freeze.
+
 from cx_Freeze import (setup, Executable)
 import sys
 from LUCA import (majver, minver)

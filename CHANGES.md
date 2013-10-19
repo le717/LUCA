@@ -3,9 +3,9 @@ LUCA Changes
 
 1.0.3
 -----
-_Released October ??, 2013_
+_Released October 18, 2013_
 
-* Better display of Creationdate
+* Better display of Creation date
 * Remove spaces in folder and file names
 * Added `argparse` based command-line rgument (`-d`, `--date`) to append folders with Creation date, formatted as `YYYY-DD-MM`
 * Remove periods from file names
